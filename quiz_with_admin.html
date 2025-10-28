@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Quiz With Admin</title>
+<style>
+  :root {
+    --bg: #0f172a;
+    --card: #1e293b;
+    --accent: #38bdf8;
+    --correct: #22c55e;
+    --wrong: #ef4444;
+    --text: #ffffff;
+    --muted: #94a3b8;
+  }
+  body {
+    margin: 0;
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+    padding: 30px 10px;
+  }
+  .container {
+    width: 100%;
+    max-width: 750px;
+    background: var(--card);
+    padding: 30px;
+    border-radius: 20px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+    animation: fadeIn 0.8s ease;
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  h1 {
+    text-align: center;
+    font-size: 1.6rem;
+    margin-bottom: 10px;
+    color: var(--accent);
+  }
+  p.subtitle {
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.9rem;
+    margin-bottom: 25px;
+  }
+
+  .progress-wrap {
+    background: #334155;
+    border-radius: 10px;
+    height: 14px;
+    overflow: hidden;
+    margin-bottom: 20px;
+  }
+  .progress-bar {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, var(--accent), #60a5fa);
+    transition: width 0.3s ease;
+  }
+
+  .question-box {
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 1.1rem;
+    font-weight: 600;
+  }
+
+  .choices {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+  }
+  button.choice {
+    flex: 1;
+    max-width: 150px;
+    background: #1e293b;
+    color: var(--text);
+    border: 2px solid var(--accent);
+    padding: 10px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease, box-shadow 0.3s ease;
+    position: relative;
+  }
+  button.choice:hover {
+    background: var(--accent);
+    color: var(--text);
+    box-shadow: 0 0 10px var(--accent);
+  }
+  button.choice.correct {
+    background: var(--correct);
+    border-color: var(--correct);
+    color: var(--text);
+    box-shadow: 0 0 15px var(--correct);
+  }
+  button.choice.wrong {
+    background: var(--wrong);
+    border-color: var(--wrong);
+    color: var(--text);
+    box-shadow: 0 0 15px var(--wrong);
+  }
+
+  .feedback {
+    text-align: center;
+    font-size: 1rem;
+    margin: 15px 0;
+    min-height: 24px;
+  }
+
+  .score {
+    text-align: right;
+    color: var(--muted);
+    font-weight: 600;
+    margin-top: 10px;
+  }
+
+  .next-btn {
+    display: block;
+    margin: 20px auto 0;
+    padding: 10px 18px;
+    border-radius: 8px;
+    background: var(--accent);
+    border: none;
+    color: var(--bg);
+    font-weight: 700;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background 0.2s ease;
+  }
+  .next-btn:hover {
+    background: #60a5fa;
+  }
+  .hidden { display: none; }
+
+  .final {
+    text-align: center;
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin-top: 20px;
+  }
+
+  @keyframes glow {
+    0% { box-shadow: 0 0 5px var(--accent); }
+    50% { box-shadow: 0 0 15px var(--accent); }
+    100% { box-shadow: 0 0 5px var(--accent); }
+  }
+
+  button.choice.glow {
+    animation: glow 1s ease-in-out infinite;
+  }
+
+  #adminSection {
+    margin-top: 30px;
+    background: #0f172a;
+    border-radius: 12px;
+    padding: 20px;
+    display: none;
+  }
+  #adminLogin {
+    margin-top: 20px;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+  <div class="container">
+    <h1>Media Literacy Quiz</h1>
+    <p class="subtitle">Test your ability to spot misinformation — 10 quick questions!</p>
+
+    <div class="progress-wrap"><div class="progress-bar" id="progress"></div></div>
+    <div class="score" id="score">Score: 0/10</div>
+
+    <div id="quiz">
+      <div class="question-box" id="question">Loading...</div>
+      <div class="choices">
+        <button class="choice" id="trueBtn">True</button>
+        <button class="choice" id="falseBtn">False</button>
+      </div>
+      <div class="feedback" id="feedback"></div>
+      <button class="next-btn hidden" id="nextBtn">Next ➜</button>
+    </div>
+
+    <div id="result" class="hidden">
+      <div class="final" id="finalText"></div>
+      <button class="next-btn" onclick="restartQuiz()">Restart 🔁</button>
+    </div>
+
+    <div id="adminLogin">
+      <input type="password" id="adminPass" placeholder="Enter admin password" style="padding:8px;border-radius:6px;border:none;outline:none;">
+      <button class="next-btn" onclick="checkPassword()">Login</button>
+    </div>
+
+    <div id="adminSection">
+      <h2>Admin Panel</h2>
+      <p>Here you can view data and add questions (password protected)</p>
+      <button class="next-btn" onclick="toggleQuiz()">Back to Quiz</button>
+    </div>
+  </div>
+
+<script>
+const quizData = [
+  { q: "A celebrity’s photo with a shocking caption is always true if many people share it.", a: false, e: "Virality doesn’t equal truth." },
+  { q: "If an image has inconsistent lighting or duplicated elements, it may be edited.", a: true, e: "Visual inconsistencies are a giveaway." },
+  { q: "Screenshots of messages are always reliable evidence.", a: false, e: "Screenshots can be fabricated or altered." },
+  { q: "Deepfakes can be detected by subtle glitches like unnatural blinking.", a: true, e: "Even the best deepfakes have telltale signs." },
+  { q: "Headlines in ALL CAPS are more trustworthy.", a: false, e: "ALL CAPS = clickbait energy. Avoid emotional traps." },
+  { q: "Reverse image search helps identify the origin of a photo.", a: true, e: "Reverse search is a journalist’s best friend." },
+  { q: "If something is posted on a .gov website, it’s automatically unbiased.", a: false, e: "Even official sources can contain outdated info." },
+  { q: "If only one news site reports a story, verify before sharing.", a: true, e: "Multiple credible confirmations = reliability." },
+  { q: "Satire sites sometimes publish believable but fake stories.", a: true, e: "Always check the About page or disclaimers." },
+  { q: "Numbers in an article guarantee it’s accurate.", a: false, e: "Statistics can be manipulated or cherry-picked." }
+];
+
+let index = 0;
+let score = 0;
+
+const questionEl = document.getElementById("question");
+const feedbackEl = document.getElementById("feedback");
+const progressBar = document.getElementById("progress");
+const scoreEl = document.getElementById("score");
+const nextBtn = document.getElementById("nextBtn");
+const trueBtn = document.getElementById("trueBtn");
+const falseBtn = document.getElementById("falseBtn");
+const quizEl = document.getElementById("quiz");
+const resultEl = document.getElementById("result");
+const finalText = document.getElementById("finalText");
+const adminSection = document.getElementById("adminSection");
+const adminLogin = document.getElementById("adminLogin");
+
+function loadQuestion() {
+  const q = quizData[index];
+  questionEl.textContent = `${index + 1}. ${q.q}`;
+  feedbackEl.textContent = "";
+  nextBtn.classList.add("hidden");
+  trueBtn.disabled = false;
+  falseBtn.disabled = false;
+  trueBtn.classList.remove("correct", "wrong", "glow");
+  falseBtn.classList.remove("correct", "wrong", "glow");
+  updateProgress();
+}
+
+function updateProgress() {
+  const percent = ((index) / quizData.length) * 100;
+  progressBar.style.width = `${percent}%`;
+  scoreEl.textContent = `Score: ${score}/${quizData.length}`;
+}
+
+function handleAnswer(choice) {
+  const correct = quizData[index].a === choice;
+  if (correct) {
+    score++;
+    feedbackEl.textContent = "✅ Correct! " + quizData[index].e;
+    feedbackEl.style.color = "var(--correct)";
+  } else {
+    feedbackEl.textContent = "❌ Wrong! " + quizData[index].e;
+    feedbackEl.style.color = "var(--wrong)";
+  }
+
+  trueBtn.disabled = falseBtn.disabled = true;
+  if (quizData[index].a) trueBtn.classList.add("correct"); else falseBtn.classList.add("correct");
+  if (!correct) (choice ? trueBtn : falseBtn).classList.add("wrong");
+
+  trueBtn.classList.add("glow");
+  falseBtn.classList.add("glow");
+
+  nextBtn.classList.remove("hidden");
+  updateProgress();
+}
+
+function nextQuestion() {
+  index++;
+  if (index < quizData.length) {
+    loadQuestion();
+  } else {
+    showResults();
+  }
+}
+
+function showResults() {
+  quizEl.classList.add("hidden");
+  resultEl.classList.remove("hidden");
+  progressBar.style.width = "100%";
+  finalText.textContent = `You scored ${score}/${quizData.length} 🧠`;
+}
+
+function restartQuiz() {
+  index = 0;
+  score = 0;
+  quizEl.classList.remove("hidden");
+  resultEl.classList.add("hidden");
+  loadQuestion();
+}
+
+function checkPassword() {
+  const pass = document.getElementById("adminPass").value;
+  if (pass === "password") {
+    adminSection.style.display = "block";
+    adminLogin.style.display = "none";
+  } else {
+    alert("Incorrect password!");
+  }
+}
+
+function toggleQuiz() {
+  adminSection.style.display = "none";
+  adminLogin.style.display = "block";
+}
+
+trueBtn.addEventListener("click", () => handleAnswer(true));
+falseBtn.addEventListener("click", () => handleAnswer(false));
+nextBtn.addEventListener("click", nextQuestion);
+
+loadQuestion();
+</script>
+</body>
+</html>
