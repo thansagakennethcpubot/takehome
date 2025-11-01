@@ -3,228 +3,56 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'; img-src 'self' data:;">
+  <!-- Relax CSP so external JS file runs -->
+  <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'; img-src 'self' data:;">
   <title>Neon Media Literacy Quiz — Admin + Player</title>
-
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap">
   <style>
     :root{
-      --bg:#050816; --panel:#07122a; --card:#0b1530; --accent1:#38bdf8; --accent2:#8b5cf6;
-      --glow:rgba(56,189,248,0.15); --good:#22c55e; --bad:#ef4444; --muted:#9fb0c8; --text:#e6eef6;
+      --bg:#050816;--panel:#07122a;--card:#0b1530;--accent1:#38bdf8;--accent2:#8b5cf6;
+      --good:#22c55e;--bad:#ef4444;--muted:#9fb0c8;--text:#e6eef6;
     }
     *{box-sizing:border-box}
-    body{margin:0;background:radial-gradient(600px 300px at 10% 10%, rgba(124,58,237,0.06), transparent),radial-gradient(800px 400px at 90% 90%, rgba(56,189,248,0.04), transparent),var(--bg);font-family:Inter,ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,Arial;color:var(--text);min-height:100vh;padding:28px;display:flex;align-items:flex-start;justify-content:center}
-    .app{width:100%;max-width:1100px}
-    .header{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:18px}
-    .brand h1{margin:0;color:var(--accent1);letter-spacing:0.6px}
-    .brand p{margin:0;color:var(--muted);font-size:13px}
-    .controls{display:flex;gap:8px}
-    .btn{background:linear-gradient(90deg,var(--card),var(--panel));border:1px solid rgba(255,255,255,0.03);padding:8px 12px;border-radius:10px;color:var(--accent1);cursor:pointer;font-weight:700;transition:transform .15s}
-    .btn:hover{transform:translateY(-2px)}
-    .btn.primary{background:linear-gradient(90deg,var(--accent1),var(--accent2));color:#041025;border:none;box-shadow:0 6px 18px rgba(59,130,246,0.12)}
-    .layout{display:grid;grid-template-columns:1fr 420px;gap:18px}
-    @media(max-width:980px){.layout{grid-template-columns:1fr}}
-    .card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border-radius:14px;padding:16px;border:1px solid rgba(255,255,255,0.02);box-shadow:0 8px 30px rgba(2,6,23,0.6)}
-    .question{font-size:1.1rem;font-weight:800;margin:16px 0}
-    .choices{display:flex;gap:12px}
-    .choice{flex:1;padding:12px;border-radius:10px;border:2px solid rgba(255,255,255,0.03);background:transparent;color:#fff;font-weight:800;cursor:pointer;transition:all .2s}
-    .choice:hover{transform:translateY(-4px);box-shadow:0 10px 30px rgba(56,189,248,0.06)}
+    body{margin:0;background:var(--bg);font-family:Inter,ui-sans-serif,system-ui;color:var(--text);
+         min-height:100vh;padding:28px;display:flex;justify-content:center}
+    .app{width:100%;max-width:900px}
+    .btn{background:linear-gradient(90deg,var(--card),var(--panel));border:1px solid rgba(255,255,255,0.05);
+         padding:8px 12px;border-radius:10px;color:var(--accent1);cursor:pointer;font-weight:700}
+    .btn.primary{background:linear-gradient(90deg,var(--accent1),var(--accent2));color:#041025;border:none}
+    .choice{flex:1;padding:12px;border-radius:10px;border:2px solid rgba(255,255,255,0.05);color:#fff;
+            background:transparent;font-weight:800;cursor:pointer}
     .choice.correct{background:linear-gradient(90deg,var(--good),#10b981)}
     .choice.wrong{background:linear-gradient(90deg,var(--bad),#fb7185)}
-    .footer{margin-top:12px;color:var(--muted);font-size:13px;text-align:center}
-    .progress-wrap{background:#102033;border-radius:12px;height:14px;overflow:hidden}
-    .progress{height:100%;width:0;background:linear-gradient(90deg,var(--accent1),var(--accent2));transition:width .45s cubic-bezier(.2,.9,.2,1)}
-    .small{font-size:13px;color:var(--muted)}
-    .sidebar .admin-title{color:var(--accent2);font-weight:800;margin-bottom:10px}
-    .modal{position:fixed;left:0;top:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:linear-gradient(0deg,rgba(2,6,23,0.6),rgba(2,6,23,0.6));z-index:60}
-    .modal-card{width:96%;max-width:520px;background:var(--card);padding:18px;border-radius:12px;border:1px solid rgba(255,255,255,0.03)}
-    .small-btn{padding:6px 8px;border-radius:8px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.02);color:var(--muted);cursor:pointer}
-    .confetti{pointer-events:none;position:fixed;left:0;top:0;width:100%;height:100%;overflow:hidden}
-    .confetti span{position:absolute;width:10px;height:14px;opacity:0;transform:translateY(-10px) rotate(0);animation:drop 1.6s linear forwards}
-    @keyframes drop{to{opacity:1;transform:translateY(110vh) rotate(720deg)}}
   </style>
 </head>
 <body>
   <div class="app">
-    <div class="header">
-      <div class="brand">
-        <h1>Neon Media Literacy Quiz</h1>
-        <p>Spot misinformation. Train your instincts. Look cool doing it.</p>
-      </div>
-      <div class="controls">
-        <button class="btn" id="openAdminBtn">Admin</button>
-        <button class="btn primary" id="downloadBtn">Download Data</button>
-        <button class="btn" id="clearAllBtn">Clear All</button>
-      </div>
+    <h1>Neon Media Literacy Quiz</h1>
+    <p class="small">Spot misinformation. Train your instincts.</p>
+
+    <div id="startScreen">
+      <input id="playerName" placeholder="Your name" />
+      <button class="btn primary" id="startBtn">Start</button>
     </div>
 
-    <div class="layout">
-      <main class="card">
-        <div class="quiz-top">
-          <div class="progress-wrap"><div class="progress" id="progress"></div></div>
-          <div class="score small" id="score">Score: 0/10</div>
-        </div>
-
-        <div id="startScreen">
-          <label class="small muted">Enter your name to start</label>
-          <div style="display:flex;gap:8px;margin-top:8px">
-            <input id="playerName" class="input" placeholder="Your name" />
-            <button class="btn primary" id="startBtn">Start</button>
-          </div>
-        </div>
-
-        <div id="quizArea" style="display:none">
-          <div class="question" id="question">Loading...</div>
-          <div class="choices">
-            <button class="choice" id="btnTrue">True</button>
-            <button class="choice" id="btnFalse">False</button>
-          </div>
-          <div class="feedback" id="feedback"></div>
-          <div class="next" style="text-align:right;margin-top:10px"><button class="btn" id="nextBtn">Next ➜</button></div>
-        </div>
-
-        <div id="endArea" style="display:none;text-align:center">
-          <h3 id="finalText"></h3>
-          <button class="btn primary" id="restartBtn">Restart</button>
-        </div>
-
-        <div class="footer">Neon edition • Data saved locally in your browser</div>
-      </main>
-
-      <aside class="card sidebar" id="adminPanel" style="display:none">
-        <div class="admin-title">Admin Console</div>
-        <div class="small muted">(Password protected)</div>
-        <div style="margin-top:10px"> 
-          <button class="btn" id="viewSubsBtn">View Submissions</button>
-          <button class="btn" id="manageQBtn">Manage Questions</button>
-        </div>
-
-        <div id="adminStats" style="margin-top:12px">
-          <div class="small muted">Total attempts: <span id="totalAttempts">0</span></div>
-          <div class="small muted">Avg score: <span id="avgScore">0</span></div>
-        </div>
-
-        <div style="margin-top:12px">
-          <label class="small muted">Admin password</label>
-          <input id="adminPassInput" class="input" type="password" placeholder="Enter admin password" />
-          <div style="display:flex;gap:8px;margin-top:8px">
-            <button class="btn" id="adminLoginBtn">Unlock</button>
-            <button class="btn" id="adminLockBtn" style="display:none">Lock</button>
-          </div>
-        </div>
-      </aside>
-    </div>
-
-    <div id="modal" class="modal" style="display:none">
-      <div class="modal-card">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-          <strong id="modalTitle">Modal</strong>
-          <div><button class="small-btn" id="closeModal">Close</button></div>
-        </div>
-        <div id="modalBody"></div>
+    <div id="quizArea" style="display:none">
+      <div id="question"></div>
+      <div>
+        <button class="choice" id="btnTrue">True</button>
+        <button class="choice" id="btnFalse">False</button>
       </div>
+      <div id="feedback"></div>
+      <button class="btn" id="nextBtn" style="display:none">Next ➜</button>
     </div>
 
-    <div class="confetti" id="confetti"></div>
+    <div id="endArea" style="display:none">
+      <h3 id="finalText"></h3>
+      <button class="btn primary" id="restartBtn">Restart</button>
+    </div>
   </div>
 
-  <script type="module">
-    // Local storage keys
-    const QKEY = 'neon_quiz_questions_v1';
-    const SKEY = 'neon_quiz_submissions_v1';
-    const ADMIN_PASS = 'password';
-
-    const DEFAULT_Q = [
-      {q:"A celebrity’s photo with a shocking caption is always true if many people share it.",a:false,e:"Virality ≠ truth; photos can be altered or misattributed."},
-      {q:"If an image has inconsistent lighting or duplicated elements, it may be edited.",a:true,e:"Visual inconsistencies commonly indicate manipulation."},
-      {q:"Screenshots of messages are always reliable evidence.",a:false,e:"Screenshots can be fabricated; verify original sources."},
-      {q:"Deepfakes can be detected by subtle glitches like unnatural blinking.",a:true,e:"Deepfakes often leave small artifacts but detection is improving."},
-      {q:"Headlines in ALL CAPS are more trustworthy.",a:false,e:"ALL CAPS is often clickbait designed to provoke reactions."},
-      {q:"Reverse image search helps identify the origin of a photo.",a:true,e:"Reverse search often reveals earliest appearances of images."},
-      {q:"If only one news site reports a story, verify before sharing.",a:true,e:"Multiple reputable confirmations increase reliability."},
-      {q:"Satire sites sometimes publish believable but fake stories.",a:true,e:"Satire intentionally creates fictional pieces — check disclaimers."},
-      {q:"Numbers in an article guarantee it’s accurate.",a:false,e:"Statistics can mislead; check methodology and source."}
-    ];
-
-    const get = id => document.getElementById(id);
-
-    // Elements
-    const startScreen=get('startScreen'),playerNameInput=get('playerName'),startBtn=get('startBtn');
-    const quizArea=get('quizArea'),questionEl=get('question'),btnTrue=get('btnTrue'),btnFalse=get('btnFalse');
-    const feedbackEl=get('feedback'),progressEl=get('progress'),scoreEl=get('score'),nextBtn=get('nextBtn');
-    const endArea=get('endArea'),finalText=get('finalText'),restartBtn=get('restartBtn');
-    const openAdminBtn=get('openAdminBtn'),adminPanel=get('adminPanel');
-    const adminLoginBtn=get('adminLoginBtn'),adminLockBtn=get('adminLockBtn'),adminPassInput=get('adminPassInput');
-    const modal=get('modal'),modalTitle=get('modalTitle'),modalBody=get('modalBody'),closeModal=get('closeModal');
-    const viewSubsBtn=get('viewSubsBtn'),manageQBtn=get('manageQBtn'),totalAttempts=get('totalAttempts'),avgScore=get('avgScore');
-    const downloadBtn=get('downloadBtn'),clearAllBtn=get('clearAllBtn');
-
-    let questions=load(QKEY,DEFAULT_Q), submissions=load(SKEY,[]);
-    let idx=0, score=0, playerName='', answers=[];
-
-    function load(key,fallback){try{const r=localStorage.getItem(key);return r?JSON.parse(r):fallback.slice();}catch{return fallback.slice();}}
-    function save(key,val){localStorage.setItem(key,JSON.stringify(val));}
-
-    function init(){updateStats(); renderStart();}
-    function renderStart(){startScreen.style.display='block';quizArea.style.display='none';endArea.style.display='none';}
-    function startQuiz(){playerName=(playerNameInput.value||'Anonymous').trim(); if(!playerName){alert('Please enter your name');return;}
-      startScreen.style.display='none';quizArea.style.display='block';idx=0;score=0;answers=[];loadQuestion();}
-    function loadQuestion(){const q=questions[idx];questionEl.textContent=`${idx+1}. ${q.q}`;feedbackEl.textContent='';btnTrue.disabled=btnFalse.disabled=false;btnTrue.className='choice';btnFalse.className='choice';nextBtn.style.display='none';updateProgress();}
-    function updateProgress(){progressEl.style.width=`${(idx/questions.length)*100}%`;scoreEl.textContent=`Score: ${score}/${questions.length}`;}
-    function handleAnswer(isTrue){const q=questions[idx];const correct=q.a===isTrue;btnTrue.disabled=btnFalse.disabled=true;
-      if(correct){score++;feedbackEl.textContent='✅ Correct — '+q.e;feedbackEl.style.color='var(--good)';if(isTrue)btnTrue.classList.add('correct');else btnFalse.classList.add('correct');}
-      else{feedbackEl.textContent='❌ Wrong — '+q.e;feedbackEl.style.color='var(--bad)';if(isTrue)btnTrue.classList.add('wrong');else btnFalse.classList.add('wrong');if(q.a)(q.a?btnTrue:btnFalse).classList.add('correct');}
-      answers.push({q:q.q,chosen:isTrue,correct:q.a}); nextBtn.style.display='inline-block';triggerConfetti(correct);updateProgress();}
-    function nextQuestion(){idx++; if(idx<questions.length){loadQuestion();}else{finishQuiz();}}
-    function finishQuiz(){quizArea.style.display='none';endArea.style.display='block';finalText.textContent=`${playerName}, you scored ${score}/${questions.length}`;
-      const sub={name:playerName,score,total:questions.length,when:new Date().toISOString(),answers};
-      submissions.push(sub);save(SKEY,submissions);updateStats();}
-    function restart(){playerNameInput.value='';renderStart();}
-
-    function triggerConfetti(ok){if(!ok)return;const el=get('confetti');el.innerHTML='';for(let i=0;i<20;i++){const s=document.createElement('span');
-      s.style.left=(Math.random()*100)+'%';s.style.background=['#f43f5e','#f59e0b','#10b981','#60a5fa','#a78bfa'][Math.floor(Math.random()*5)];
-      s.style.animationDelay=(Math.random()*0.3)+'s';el.appendChild(s);}setTimeout(()=>el.innerHTML='',1600);}
-
-    // Admin + modals
-    openAdminBtn.addEventListener('click',()=>adminPanel.style.display=adminPanel.style.display==='none'?'block':'none');
-    adminLoginBtn.addEventListener('click',()=>{if(adminPassInput.value===ADMIN_PASS)unlockAdmin();else alert('Wrong password');});
-    adminLockBtn.addEventListener('click',lockAdmin);
-    function unlockAdmin(){adminLoginBtn.style.display='none';adminLockBtn.style.display='inline-block';adminPassInput.style.display='none';openAdminBtn.textContent='Admin (unlocked)';}
-    function lockAdmin(){adminLoginBtn.style.display='inline-block';adminLockBtn.style.display='none';adminPassInput.style.display='block';openAdminBtn.textContent='Admin';}
-    viewSubsBtn.addEventListener('click',openSubsModal);manageQBtn.addEventListener('click',openQuestionsModal);
-    closeModal.addEventListener('click',()=>{modal.style.display='none';modalBody.innerHTML='';});
-
-    function openSubsModal(){modal.style.display='flex';modalTitle.textContent='Submissions';renderSubs();}
-    function renderSubs(){modalBody.innerHTML='';if(submissions.length===0){modalBody.innerHTML='<div class="small muted">No submissions yet</div>';return;}
-      const table=document.createElement('table');table.className='table';table.innerHTML='<thead><tr><th>When</th><th>Name</th><th>Score</th></tr></thead>';
-      const tbody=document.createElement('tbody');
-      submissions.slice().reverse().forEach(s=>{const tr=document.createElement('tr');
-        tr.innerHTML=`<td>${new Date(s.when).toLocaleString()}</td><td>${s.name}</td><td>${s.score}/${s.total}</td>`;tbody.appendChild(tr);});
-      table.appendChild(tbody);modalBody.appendChild(table);
-      const exportBtn=document.createElement('button');exportBtn.className='btn';exportBtn.textContent='Export JSON';
-      exportBtn.onclick=()=>downloadJSON({submissions});modalBody.appendChild(exportBtn);}
-
-    function openQuestionsModal(){modal.style.display='flex';modalTitle.textContent='Manage Questions';renderQuestionManager();}
-    function renderQuestionManager(){modalBody.innerHTML='';questions.forEach((q,i)=>{const div=document.createElement('div');
-      div.style.marginBottom='8px';div.innerHTML=`<strong>${q.q}</strong><br><span class="small">Answer: ${q.a?'True':'False'} — ${q.e}</span>`;modalBody.appendChild(div);});
-      const saveBtn=document.createElement('button');saveBtn.className='btn primary';saveBtn.textContent='Save to Storage';
-      saveBtn.onclick=()=>{save(QKEY,questions);alert('Questions saved locally!')};modalBody.appendChild(saveBtn);}
-
-    function updateStats(){totalAttempts.textContent=submissions.length;
-      if(submissions.length===0){avgScore.textContent='-';return;}
-      const avg=submissions.reduce((s,o)=>s+o.score,0)/submissions.length;avgScore.textContent=avg.toFixed(2);}
-    function downloadJSON(obj){const blob=new Blob([JSON.stringify(obj,null,2)],{type:'application/json'});
-      const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='neon_quiz_data.json';a.click();URL.revokeObjectURL(url);}
-    downloadBtn.addEventListener('click',()=>downloadJSON({questions,submissions}));
-    clearAllBtn.addEventListener('click',()=>{if(confirm('Clear all data?')){localStorage.removeItem(QKEY);localStorage.removeItem(SKEY);questions=DEFAULT_Q.slice();submissions=[];updateStats();alert('Cleared!');renderStart();}});
-
-    // Events
-    startBtn.addEventListener('click',startQuiz);
-    btnTrue.addEventListener('click',()=>handleAnswer(true));
-    btnFalse.addEventListener('click',()=>handleAnswer(false));
-    nextBtn.addEventListener('click',nextQuestion);
-    restartBtn.addEventListener('click',restart);
-
-    init();
-  </script>
+  <!-- EXTERNAL JS (this fixes the issue) -->
+  <script src="script.js"></script>
 </body>
 </html>
