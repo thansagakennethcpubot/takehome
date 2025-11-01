@@ -84,7 +84,7 @@
   </div>
 
 <script>
-const SHEET_URL = "https://script.google.com/macros/s/AKfycbyoLmhBGi9ecouw3JR_cyYNBWL4T70rIW1AR9CzNfYEYHpi_C1xrmvK1SCHZxLAKE1i/exec";
+const SHEET_URL = "https://script.google.com/macros/s/AKfycbwUsuf9SESCtU-UgWBCFDsk94MQfdVu6EnEga4RAkb5XmK_xRGCjC6xnIvEqL-3S2Gt/exec";
 
 const questions = [
   {q:"A celebrity’s photo with a shocking caption is always true if many people share it.",a:false,e:"Virality doesn’t equal truth. Photos and captions can be edited or taken out of context."},
@@ -173,7 +173,7 @@ function showSummary(){
   ratingEl.textContent = rating;
   progressText.textContent = "Quiz Completed 🎉";
 
-  // Save results to Google Sheet
+  // Send results to Google Sheet
   fetch(SHEET_URL, {
     method: "POST",
     headers: {"Content-Type":"application/json"},
@@ -189,7 +189,7 @@ function showSummary(){
   .then(d => saveStatus.textContent = "✅ Result saved to Google Sheet")
   .catch(err => {
     console.error(err);
-    saveStatus.textContent = "⚠️ Could not save result. Please check the Google Script settings.";
+    saveStatus.textContent = "⚠️ Could not save result. Please check your Google Script settings.";
   });
 }
 
