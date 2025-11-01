@@ -56,14 +56,20 @@
     <h1>Take Home Assignment</h1>
     <p class="muted" style="text-align:center;">Answer true or false, and learn why.</p>
 
-    <div class="progress-section">
+    <div id="namePrompt">
+      <h3 style="text-align:center;">Enter your name to begin:</h3>
+      <input id="userName" placeholder="Your full name">
+      <button id="startBtn" class="btn primary" style="margin-top:10px;width:100%;">Start Quiz</button>
+    </div>
+
+    <div class="progress-section hidden" id="progressSection">
       <div id="progressText" class="progress-text"></div>
       <div class="progress-container">
         <div id="progressBar" class="progress-bar"></div>
       </div>
     </div>
 
-    <div id="quizArea">
+    <div id="quizArea" class="hidden">
       <div id="question" class="question"></div>
       <div class="choices">
         <button id="btnTrue" class="btn">True</button>
@@ -79,44 +85,16 @@
       <h2>Quiz Complete 🎉</h2>
       <p id="scoreText"></p>
       <div id="rating"></div>
+      <p id="saveStatus"></p>
       <button id="restartBtn" class="btn primary" style="margin-top:15px;">Restart Quiz</button>
     </div>
 
-    <div class="toggle">
-      <button id="showLogin" class="small-btn">Admin Login ⚙️</button>
-      <button id="logoutBtn" class="small-btn hidden">Logout</button>
-    </div>
-
-    <div id="loginPanel" class="login-panel hidden">
-      <h3 style="margin-top:0;color:var(--accent2)">Admin Login</h3>
-      <div class="row"><input id="adminUser" placeholder="Username"></div>
-      <div class="row"><input id="adminPass" type="password" placeholder="Password"></div>
-      <div class="row"><button id="loginBtn" class="btn primary">Login</button></div>
-    </div>
-
-    <div id="adminPanel" class="admin-panel hidden">
-      <h3 style="margin-top:0;color:var(--accent2)">Admin Panel</h3>
-      <div class="row"><input id="newQ" placeholder="Question text"></div>
-      <div class="row">
-        <select id="newA">
-          <option value="true">True</option>
-          <option value="false">False</option>
-        </select>
-      </div>
-      <div class="row"><textarea id="newE" rows="2" placeholder="Explanation (why)"></textarea></div>
-      <div class="row">
-        <button id="addBtn" class="btn primary">Add Question</button>
-        <button id="saveBtn" class="btn">Save</button>
-      </div>
-      <h4 style="margin-top:16px;">Question List</h4>
-      <table id="qTable"></table>
-    </div>
-
-    <div class="footer">Data saved locally in your browser</div>
+    <div class="footer">Data saved automatically to admin Google Sheet</div>
   </div>
 
 <script>
-const QKEY = 'take_home_questions';
+const SHEET_URL = "https://script.google.com/macros/s/AKfycbyzu9nMykAjUGAfmPMxKNdy1mCjydSnz-Zq-DisPwcvOW2Fpqm5H-b-P8on3vNMpwWf/exec";
+
 const DEFAULTS = [
   {q:"A celebrity’s photo with a shocking caption is always true if many people share it.",a:false,e:"Virality doesn’t equal truth. Photos and captions can be edited or taken out of context."},
   {q:"If an image has inconsistent lighting, it may be edited.",a:true,e:"Lighting mismatches often indicate manipulation."},
@@ -129,8 +107,10 @@ const DEFAULTS = [
   {q:"Critical thinking helps protect you from fake news.",a:true,e:"Asking questions and evaluating evidence helps separate facts from fiction."},
   {q:"Images and videos on social media are always genuine evidence.",a:false,e:"Visual content can be staged, edited, or taken out of context."}
 ];
-let questions = JSON.parse(localStorage.getItem(QKEY) || JSON.stringify(DEFAULTS));
+
+let questions = [...DEFAULTS];
 let idx = 0, score = 0;
+let userName = "", userAnswers = [];
 
 const qEl = document.getElementById('question');
 const feedback = document.getElementById('feedback');
@@ -144,6 +124,19 @@ const restartBtn = document.getElementById('restartBtn');
 const quizArea = document.getElementById('quizArea');
 const progressBar = document.getElementById('progressBar');
 const progressText = document.getElementById('progressText');
+const namePrompt = document.getElementById('namePrompt');
+const progressSection = document.getElementById('progressSection');
+const saveStatus = document.getElementById('saveStatus');
+const startBtn = document.getElementById('startBtn');
+
+startBtn.onclick = () => {
+  userName = document.getElementById('userName').value.trim();
+  if(!userName) return alert("Please enter your name first.");
+  namePrompt.classList.add('hidden');
+  quizArea.classList.remove('hidden');
+  progressSection.classList.remove('hidden');
+  renderQuestion();
+};
 
 function renderQuestion(){
   const q = questions[idx];
@@ -163,6 +156,7 @@ function updateProgress(){
 function answer(isTrue){
   const q = questions[idx];
   const correct = q.a === isTrue;
+  userAnswers.push({question:q.q, answer:isTrue, correct});
   btnT.disabled = btnF.disabled = true;
   feedback.textContent = (correct?"✅ Correct — ":"❌ Wrong — ") + q.e;
   feedback.className = "feedback " + (correct?"correct":"wrong");
@@ -182,17 +176,36 @@ function showSummary(){
   quizArea.style.display = "none";
   summary.style.display = "block";
   const percent = Math.round((score/questions.length)*100);
-  scoreText.textContent = `You scored ${score} out of ${questions.length} (${percent}%)`;
+  scoreText.textContent = `${userName}, you scored ${score} out of ${questions.length} (${percent}%)`;
   let rating="";
   if(percent>=80){rating="Excellent work! 🌟";ratingEl.className="excellent";}
   else if(percent>=50){rating="Good effort! 👍";ratingEl.className="good";}
   else{rating="Try again — you’ll get it! 💪";ratingEl.className="tryagain";}
   ratingEl.textContent = rating;
   progressText.textContent = "Quiz Completed 🎉";
+
+  // Send results to Google Sheet
+  fetch(SHEET_URL, {
+    method: "POST",
+    headers: {"Content-Type":"application/json"},
+    body: JSON.stringify({
+      name: userName,
+      score: score,
+      total: questions.length,
+      percent: percent,
+      answers: userAnswers
+    })
+  })
+  .then(res => res.json())
+  .then(d => saveStatus.textContent = "✅ Result saved to Google Sheet")
+  .catch(err => {
+    console.error(err);
+    saveStatus.textContent = "⚠️ Could not save result. Please check your connection.";
+  });
 }
 
 function restartQuiz(){
-  idx=0;score=0;
+  idx=0;score=0;userAnswers=[];
   summary.style.display="none";
   quizArea.style.display="block";
   renderQuestion();
@@ -202,60 +215,6 @@ btnT.onclick=()=>answer(true);
 btnF.onclick=()=>answer(false);
 nextBtn.onclick=next;
 restartBtn.onclick=restartQuiz;
-
-const qTable = document.getElementById('qTable');
-const adminPanel = document.getElementById('adminPanel');
-const loginPanel = document.getElementById('loginPanel');
-const showLogin = document.getElementById('showLogin');
-const logoutBtn = document.getElementById('logoutBtn');
-const loginBtn = document.getElementById('loginBtn');
-
-function renderAdmin(){
-  qTable.innerHTML = `<tr><th>#</th><th>Question</th><th>Answer</th><th></th></tr>` +
-  questions.map((q,i)=>
-    `<tr>
-      <td>${i+1}</td>
-      <td>${q.q}</td>
-      <td>${q.a?'True':'False'}</td>
-      <td><button class="small-btn" onclick="delQ(${i})">🗑️</button></td>
-    </tr>`).join("");
-}
-function delQ(i){ if(confirm("Delete this question?")){questions.splice(i,1);renderAdmin();}}
-function addQ(){
-  const q=document.getElementById('newQ').value.trim();
-  const a=document.getElementById('newA').value==='true';
-  const e=document.getElementById('newE').value.trim();
-  if(!q||!e) return alert("Fill question and explanation");
-  questions.push({q,a,e});
-  document.getElementById('newQ').value="";
-  document.getElementById('newE').value="";
-  renderAdmin();
-}
-function saveQ(){localStorage.setItem(QKEY,JSON.stringify(questions));alert("Saved locally!");}
-document.getElementById('addBtn').onclick=addQ;
-document.getElementById('saveBtn').onclick=saveQ;
-
-loginBtn.onclick = ()=>{
-  const u=document.getElementById('adminUser').value.trim();
-  const p=document.getElementById('adminPass').value.trim();
-  if(u==='admin' && p==='password'){
-    alert('Login successful!');
-    loginPanel.classList.add('hidden');
-    adminPanel.classList.remove('hidden');
-    showLogin.classList.add('hidden');
-    logoutBtn.classList.remove('hidden');
-    renderAdmin();
-  }else alert('Invalid credentials.');
-};
-logoutBtn.onclick = ()=>{
-  adminPanel.classList.add('hidden');
-  logoutBtn.classList.add('hidden');
-  showLogin.classList.remove('hidden');
-  alert('Logged out.');
-};
-showLogin.onclick=()=>loginPanel.classList.toggle('hidden');
-
-renderQuestion();
 </script>
 </body>
 </html>
