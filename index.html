@@ -1,58 +1,261 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <!-- Relax CSP so external JS file runs -->
-  <meta http-equiv="Content-Security-Policy"
-        content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'; img-src 'self' data:;">
-  <title>Neon Media Literacy Quiz — Admin + Player</title>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap">
-  <style>
-    :root{
-      --bg:#050816;--panel:#07122a;--card:#0b1530;--accent1:#38bdf8;--accent2:#8b5cf6;
-      --good:#22c55e;--bad:#ef4444;--muted:#9fb0c8;--text:#e6eef6;
-    }
-    *{box-sizing:border-box}
-    body{margin:0;background:var(--bg);font-family:Inter,ui-sans-serif,system-ui;color:var(--text);
-         min-height:100vh;padding:28px;display:flex;justify-content:center}
-    .app{width:100%;max-width:900px}
-    .btn{background:linear-gradient(90deg,var(--card),var(--panel));border:1px solid rgba(255,255,255,0.05);
-         padding:8px 12px;border-radius:10px;color:var(--accent1);cursor:pointer;font-weight:700}
-    .btn.primary{background:linear-gradient(90deg,var(--accent1),var(--accent2));color:#041025;border:none}
-    .choice{flex:1;padding:12px;border-radius:10px;border:2px solid rgba(255,255,255,0.05);color:#fff;
-            background:transparent;font-weight:800;cursor:pointer}
-    .choice.correct{background:linear-gradient(90deg,var(--good),#10b981)}
-    .choice.wrong{background:linear-gradient(90deg,var(--bad),#fb7185)}
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Take Home Assignment</title>
+<style>
+  :root{
+    --bg:#0a0c1b;--panel:#141a2f;--accent:#3b82f6;--accent2:#8b5cf6;
+    --good:#22c55e;--bad:#ef4444;--text:#e5e7eb;--muted:#94a3b8;--ok:#facc15;
+  }
+  *{box-sizing:border-box;font-family:'Segoe UI',sans-serif;}
+  body{margin:0;background:linear-gradient(160deg,var(--panel),#0f172a);color:var(--text);
+       display:flex;flex-direction:column;align-items:center;min-height:100vh;padding:30px;}
+  h1{color:var(--accent);margin-bottom:10px;text-align:center;}
+  .app{max-width:700px;width:100%;background:rgba(255,255,255,0.04);padding:24px;border-radius:16px;
+       box-shadow:0 8px 20px rgba(0,0,0,0.3);}
+  .progress-section{text-align:center;margin-top:10px;}
+  .progress-text{color:var(--muted);font-size:0.9rem;margin-bottom:4px;}
+  .progress-container{width:100%;background:rgba(255,255,255,0.1);border-radius:10px;height:10px;overflow:hidden;}
+  .progress-bar{height:10px;width:0;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width 0.4s ease;}
+  .question{font-weight:700;font-size:1.2rem;margin:16px 0;}
+  .choices{display:flex;gap:10px;margin-top:8px;}
+  .btn{flex:1;padding:12px;border:none;border-radius:10px;font-weight:700;cursor:pointer;
+       background:var(--panel);color:var(--text);transition:all 0.2s;}
+  .btn:hover{background:var(--accent);color:#fff;transform:translateY(-2px);}
+  .primary{background:linear-gradient(90deg,var(--accent),var(--accent2));color:#fff;}
+  .feedback{margin-top:14px;min-height:24px;font-weight:600;}
+  .correct{color:var(--good);}
+  .wrong{color:var(--bad);}
+  .footer{text-align:center;margin-top:20px;color:var(--muted);}
+  .admin-panel,.login-panel{margin-top:24px;background:rgba(255,255,255,0.03);padding:16px;border-radius:12px;}
+  input,textarea,select{width:100%;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);
+       background:rgba(255,255,255,0.05);color:var(--text);}
+  .row{display:flex;gap:8px;align-items:center;margin-top:8px;}
+  .small-btn{background:rgba(255,255,255,0.1);border:none;padding:6px 10px;border-radius:8px;color:var(--text);cursor:pointer;}
+  .small-btn:hover{background:var(--accent);}
+  table{width:100%;margin-top:10px;border-collapse:collapse;}
+  th,td{padding:6px 8px;border-bottom:1px solid rgba(255,255,255,0.1);font-size:14px;text-align:left;}
+  th{color:var(--muted);}
+  .toggle{margin-top:20px;text-align:center;}
+  .hidden{display:none;}
+  #summary{display:none;text-align:center;margin-top:20px;}
+  #summary h2{color:var(--accent);}
+  #summary p{color:var(--muted);}
+  #rating{font-size:1.1rem;margin-top:8px;font-weight:bold;}
+  .excellent{color:var(--good);}
+  .good{color:var(--ok);}
+  .tryagain{color:var(--bad);}
+  .fade-in{animation:fadeIn 0.6s ease-in;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);opacity:1;}}
+</style>
 </head>
 <body>
   <div class="app">
-    <h1>Neon Media Literacy Quiz</h1>
-    <p class="small">Spot misinformation. Train your instincts.</p>
+    <h1>Take Home Assignment</h1>
+    <p class="muted" style="text-align:center;">Answer true or false, and learn why.</p>
 
-    <div id="startScreen">
-      <input id="playerName" placeholder="Your name" />
-      <button class="btn primary" id="startBtn">Start</button>
-    </div>
-
-    <div id="quizArea" style="display:none">
-      <div id="question"></div>
-      <div>
-        <button class="choice" id="btnTrue">True</button>
-        <button class="choice" id="btnFalse">False</button>
+    <div class="progress-section">
+      <div id="progressText" class="progress-text"></div>
+      <div class="progress-container">
+        <div id="progressBar" class="progress-bar"></div>
       </div>
-      <div id="feedback"></div>
-      <button class="btn" id="nextBtn" style="display:none">Next ➜</button>
     </div>
 
-    <div id="endArea" style="display:none">
-      <h3 id="finalText"></h3>
-      <button class="btn primary" id="restartBtn">Restart</button>
+    <div id="quizArea">
+      <div id="question" class="question"></div>
+      <div class="choices">
+        <button id="btnTrue" class="btn">True</button>
+        <button id="btnFalse" class="btn">False</button>
+      </div>
+      <div id="feedback" class="feedback"></div>
+      <div class="toggle">
+        <button id="nextBtn" class="btn primary" style="display:none">Next ➜</button>
+      </div>
     </div>
+
+    <div id="summary" class="fade-in">
+      <h2>Quiz Complete 🎉</h2>
+      <p id="scoreText"></p>
+      <div id="rating"></div>
+      <button id="restartBtn" class="btn primary" style="margin-top:15px;">Restart Quiz</button>
+    </div>
+
+    <div class="toggle">
+      <button id="showLogin" class="small-btn">Admin Login ⚙️</button>
+      <button id="logoutBtn" class="small-btn hidden">Logout</button>
+    </div>
+
+    <div id="loginPanel" class="login-panel hidden">
+      <h3 style="margin-top:0;color:var(--accent2)">Admin Login</h3>
+      <div class="row"><input id="adminUser" placeholder="Username"></div>
+      <div class="row"><input id="adminPass" type="password" placeholder="Password"></div>
+      <div class="row"><button id="loginBtn" class="btn primary">Login</button></div>
+    </div>
+
+    <div id="adminPanel" class="admin-panel hidden">
+      <h3 style="margin-top:0;color:var(--accent2)">Admin Panel</h3>
+      <div class="row"><input id="newQ" placeholder="Question text"></div>
+      <div class="row">
+        <select id="newA">
+          <option value="true">True</option>
+          <option value="false">False</option>
+        </select>
+      </div>
+      <div class="row"><textarea id="newE" rows="2" placeholder="Explanation (why)"></textarea></div>
+      <div class="row">
+        <button id="addBtn" class="btn primary">Add Question</button>
+        <button id="saveBtn" class="btn">Save</button>
+      </div>
+      <h4 style="margin-top:16px;">Question List</h4>
+      <table id="qTable"></table>
+    </div>
+
+    <div class="footer">Data saved locally in your browser</div>
   </div>
 
-  <!-- EXTERNAL JS (this fixes the issue) -->
-  <script src="script.js"></script>
+<script>
+const QKEY = 'take_home_questions';
+const DEFAULTS = [
+  {q:"A celebrity’s photo with a shocking caption is always true if many people share it.",a:false,e:"Virality doesn’t equal truth. Photos and captions can be edited or taken out of context."},
+  {q:"If an image has inconsistent lighting, it may be edited.",a:true,e:"Lighting mismatches often indicate manipulation."},
+  {q:"Headlines in ALL CAPS are more trustworthy.",a:false,e:"ALL CAPS is often used for clickbait, not credibility."},
+  {q:"You should always check the source of information before believing or sharing it.",a:true,e:"Reliable information comes from verified and credible sources."},
+  {q:"If a post has many likes and comments, it must be accurate.",a:false,e:"Popularity doesn’t equal accuracy. Many viral posts spread misinformation."},
+  {q:"Fact-checking websites like Snopes or AFP Fact Check can help verify viral stories.",a:true,e:"Fact-checking sites are valuable tools for spotting misinformation."},
+  {q:"Deepfake videos are impossible to detect.",a:false,e:"Deepfakes can often be detected by analyzing unnatural movements, lighting, and metadata."},
+  {q:"It’s okay to share an article without reading it if the title sounds true.",a:false,e:"Headlines can be misleading — always read before sharing."},
+  {q:"Critical thinking helps protect you from fake news.",a:true,e:"Asking questions and evaluating evidence helps separate facts from fiction."},
+  {q:"Images and videos on social media are always genuine evidence.",a:false,e:"Visual content can be staged, edited, or taken out of context."}
+];
+let questions = JSON.parse(localStorage.getItem(QKEY) || JSON.stringify(DEFAULTS));
+let idx = 0, score = 0;
+
+const qEl = document.getElementById('question');
+const feedback = document.getElementById('feedback');
+const btnT = document.getElementById('btnTrue');
+const btnF = document.getElementById('btnFalse');
+const nextBtn = document.getElementById('nextBtn');
+const summary = document.getElementById('summary');
+const scoreText = document.getElementById('scoreText');
+const ratingEl = document.getElementById('rating');
+const restartBtn = document.getElementById('restartBtn');
+const quizArea = document.getElementById('quizArea');
+const progressBar = document.getElementById('progressBar');
+const progressText = document.getElementById('progressText');
+
+function renderQuestion(){
+  const q = questions[idx];
+  qEl.textContent = (idx+1) + ". " + q.q;
+  feedback.textContent = "";
+  btnT.disabled = btnF.disabled = false;
+  nextBtn.style.display = "none";
+  updateProgress();
+}
+
+function updateProgress(){
+  const percent = ((idx)/questions.length)*100;
+  progressBar.style.width = percent + "%";
+  progressText.textContent = `Question ${idx+1} of ${questions.length}`;
+}
+
+function answer(isTrue){
+  const q = questions[idx];
+  const correct = q.a === isTrue;
+  btnT.disabled = btnF.disabled = true;
+  feedback.textContent = (correct?"✅ Correct — ":"❌ Wrong — ") + q.e;
+  feedback.className = "feedback " + (correct?"correct":"wrong");
+  nextBtn.style.display = "inline-block";
+  if(correct) score++;
+}
+
+function next(){
+  idx++;
+  if(idx>=questions.length){
+    progressBar.style.width = "100%";
+    showSummary();
+  }else renderQuestion();
+}
+
+function showSummary(){
+  quizArea.style.display = "none";
+  summary.style.display = "block";
+  const percent = Math.round((score/questions.length)*100);
+  scoreText.textContent = `You scored ${score} out of ${questions.length} (${percent}%)`;
+  let rating="";
+  if(percent>=80){rating="Excellent work! 🌟";ratingEl.className="excellent";}
+  else if(percent>=50){rating="Good effort! 👍";ratingEl.className="good";}
+  else{rating="Try again — you’ll get it! 💪";ratingEl.className="tryagain";}
+  ratingEl.textContent = rating;
+  progressText.textContent = "Quiz Completed 🎉";
+}
+
+function restartQuiz(){
+  idx=0;score=0;
+  summary.style.display="none";
+  quizArea.style.display="block";
+  renderQuestion();
+}
+
+btnT.onclick=()=>answer(true);
+btnF.onclick=()=>answer(false);
+nextBtn.onclick=next;
+restartBtn.onclick=restartQuiz;
+
+const qTable = document.getElementById('qTable');
+const adminPanel = document.getElementById('adminPanel');
+const loginPanel = document.getElementById('loginPanel');
+const showLogin = document.getElementById('showLogin');
+const logoutBtn = document.getElementById('logoutBtn');
+const loginBtn = document.getElementById('loginBtn');
+
+function renderAdmin(){
+  qTable.innerHTML = `<tr><th>#</th><th>Question</th><th>Answer</th><th></th></tr>` +
+  questions.map((q,i)=>
+    `<tr>
+      <td>${i+1}</td>
+      <td>${q.q}</td>
+      <td>${q.a?'True':'False'}</td>
+      <td><button class="small-btn" onclick="delQ(${i})">🗑️</button></td>
+    </tr>`).join("");
+}
+function delQ(i){ if(confirm("Delete this question?")){questions.splice(i,1);renderAdmin();}}
+function addQ(){
+  const q=document.getElementById('newQ').value.trim();
+  const a=document.getElementById('newA').value==='true';
+  const e=document.getElementById('newE').value.trim();
+  if(!q||!e) return alert("Fill question and explanation");
+  questions.push({q,a,e});
+  document.getElementById('newQ').value="";
+  document.getElementById('newE').value="";
+  renderAdmin();
+}
+function saveQ(){localStorage.setItem(QKEY,JSON.stringify(questions));alert("Saved locally!");}
+document.getElementById('addBtn').onclick=addQ;
+document.getElementById('saveBtn').onclick=saveQ;
+
+loginBtn.onclick = ()=>{
+  const u=document.getElementById('adminUser').value.trim();
+  const p=document.getElementById('adminPass').value.trim();
+  if(u==='admin' && p==='password'){
+    alert('Login successful!');
+    loginPanel.classList.add('hidden');
+    adminPanel.classList.remove('hidden');
+    showLogin.classList.add('hidden');
+    logoutBtn.classList.remove('hidden');
+    renderAdmin();
+  }else alert('Invalid credentials.');
+};
+logoutBtn.onclick = ()=>{
+  adminPanel.classList.add('hidden');
+  logoutBtn.classList.add('hidden');
+  showLogin.classList.remove('hidden');
+  alert('Logged out.');
+};
+showLogin.onclick=()=>loginPanel.classList.toggle('hidden');
+
+renderQuestion();
+</script>
 </body>
 </html>
