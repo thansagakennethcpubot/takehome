@@ -29,26 +29,17 @@
   .correct{color:var(--good);}
   .wrong{color:var(--bad);}
   .footer{text-align:center;margin-top:20px;color:var(--muted);}
-  .admin-panel,.login-panel{margin-top:24px;background:rgba(255,255,255,0.03);padding:16px;border-radius:12px;}
-  input,textarea,select{width:100%;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);
+  input{width:100%;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);
        background:rgba(255,255,255,0.05);color:var(--text);}
-  .row{display:flex;gap:8px;align-items:center;margin-top:8px;}
-  .small-btn{background:rgba(255,255,255,0.1);border:none;padding:6px 10px;border-radius:8px;color:var(--text);cursor:pointer;}
-  .small-btn:hover{background:var(--accent);}
-  table{width:100%;margin-top:10px;border-collapse:collapse;}
-  th,td{padding:6px 8px;border-bottom:1px solid rgba(255,255,255,0.1);font-size:14px;text-align:left;}
-  th{color:var(--muted);}
-  .toggle{margin-top:20px;text-align:center;}
   .hidden{display:none;}
   #summary{display:none;text-align:center;margin-top:20px;}
   #summary h2{color:var(--accent);}
-  #summary p{color:var(--muted);}
   #rating{font-size:1.1rem;margin-top:8px;font-weight:bold;}
   .excellent{color:var(--good);}
   .good{color:var(--ok);}
   .tryagain{color:var(--bad);}
-  .fade-in{animation:fadeIn 0.6s ease-in;}
   @keyframes fadeIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);opacity:1;}}
+  .fade-in{animation:fadeIn 0.6s ease-in;}
 </style>
 </head>
 <body>
@@ -76,8 +67,8 @@
         <button id="btnFalse" class="btn">False</button>
       </div>
       <div id="feedback" class="feedback"></div>
-      <div class="toggle">
-        <button id="nextBtn" class="btn primary" style="display:none">Next ➜</button>
+      <div style="text-align:center;margin-top:15px;">
+        <button id="nextBtn" class="btn primary" style="display:none;">Next ➜</button>
       </div>
     </div>
 
@@ -85,17 +76,17 @@
       <h2>Quiz Complete 🎉</h2>
       <p id="scoreText"></p>
       <div id="rating"></div>
-      <p id="saveStatus"></p>
+      <p id="saveStatus" style="margin-top:10px;"></p>
       <button id="restartBtn" class="btn primary" style="margin-top:15px;">Restart Quiz</button>
     </div>
 
-    <div class="footer">Data saved automatically to admin Google Sheet</div>
+    <div class="footer">Results automatically saved to Google Sheet (admin only)</div>
   </div>
 
 <script>
-const SHEET_URL = "https://script.google.com/macros/s/AKfycbyzu9nMykAjUGAfmPMxKNdy1mCjydSnz-Zq-DisPwcvOW2Fpqm5H-b-P8on3vNMpwWf/exec";
+const SHEET_URL = "https://script.google.com/macros/s/AKfycbyoLmhBGi9ecouw3JR_cyYNBWL4T70rIW1AR9CzNfYEYHpi_C1xrmvK1SCHZxLAKE1i/exec";
 
-const DEFAULTS = [
+const questions = [
   {q:"A celebrity’s photo with a shocking caption is always true if many people share it.",a:false,e:"Virality doesn’t equal truth. Photos and captions can be edited or taken out of context."},
   {q:"If an image has inconsistent lighting, it may be edited.",a:true,e:"Lighting mismatches often indicate manipulation."},
   {q:"Headlines in ALL CAPS are more trustworthy.",a:false,e:"ALL CAPS is often used for clickbait, not credibility."},
@@ -108,9 +99,7 @@ const DEFAULTS = [
   {q:"Images and videos on social media are always genuine evidence.",a:false,e:"Visual content can be staged, edited, or taken out of context."}
 ];
 
-let questions = [...DEFAULTS];
-let idx = 0, score = 0;
-let userName = "", userAnswers = [];
+let idx = 0, score = 0, userName = "", userAnswers = [];
 
 const qEl = document.getElementById('question');
 const feedback = document.getElementById('feedback');
@@ -184,7 +173,7 @@ function showSummary(){
   ratingEl.textContent = rating;
   progressText.textContent = "Quiz Completed 🎉";
 
-  // Send results to Google Sheet
+  // Save results to Google Sheet
   fetch(SHEET_URL, {
     method: "POST",
     headers: {"Content-Type":"application/json"},
@@ -200,7 +189,7 @@ function showSummary(){
   .then(d => saveStatus.textContent = "✅ Result saved to Google Sheet")
   .catch(err => {
     console.error(err);
-    saveStatus.textContent = "⚠️ Could not save result. Please check your connection.";
+    saveStatus.textContent = "⚠️ Could not save result. Please check the Google Script settings.";
   });
 }
 
