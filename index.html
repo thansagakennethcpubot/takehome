@@ -1,60 +1,36 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Neon Media Literacy Quiz — Admin + Player</title>
-<style>
-:root{
-  --bg:#050816; --panel:#07122a; --card:#0b1530; --accent1:#38bdf8; --accent2:#8b5cf6;
-  --glow:rgba(56,189,248,0.15); --good:#22c55e; --bad:#ef4444; --muted:#9fb0c8; --text:#e6eef6;
-}
-*{box-sizing:border-box}
-body{margin:0;background:radial-gradient(600px 300px at 10% 10%, rgba(124,58,237,0.06), transparent),radial-gradient(800px 400px at 90% 90%, rgba(56,189,248,0.04), transparent),var(--bg);font-family:Inter,ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,Arial;color:var(--text);min-height:100vh;padding:28px;display:flex;align-items:flex-start;justify-content:center}
-.app{width:100%;max-width:1100px}
-.header{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:18px}
-.brand h1{margin:0;color:var(--accent1);letter-spacing:0.6px}
-.brand p{margin:0;color:var(--muted);font-size:13px}
-.controls{display:flex;gap:8px}
-.btn{background:linear-gradient(90deg,var(--card),var(--panel));border:1px solid rgba(255,255,255,0.03);padding:8px 12px;border-radius:10px;color:var(--accent1);cursor:pointer;font-weight:700}
-.btn.primary{background:linear-gradient(90deg,var(--accent1),var(--accent2));color:#041025;border:none;box-shadow:0 6px 18px rgba(59,130,246,0.12)}
-.layout{display:grid;grid-template-columns:1fr 420px;gap:18px}
-@media(max-width:980px){.layout{grid-template-columns:1fr}}
-.card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border-radius:14px;padding:16px;border:1px solid rgba(255,255,255,0.02);box-shadow:0 8px 30px rgba(2,6,23,0.6)}
-.quiz-top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px}
-.progress-wrap{background:#102033;border-radius:12px;height:14px;overflow:hidden}
-.progress{height:100%;width:0;background:linear-gradient(90deg,var(--accent1),var(--accent2));transition:width .45s cubic-bezier(.2,.9,.2,1)}
-.score{color:var(--muted);font-weight:700}
-.question{font-size:1.1rem;font-weight:800;margin:16px 0}
-.choices{display:flex;gap:12px}
-.choice{flex:1;padding:12px;border-radius:10px;border:2px solid rgba(255,255,255,0.03);background:transparent;color:#fff;font-weight:800;cursor:pointer;transition:all .2s}
-.choice:hover{transform:translateY(-4px);box-shadow:0 10px 30px rgba(56,189,248,0.06)}
-.choice.correct{background:linear-gradient(90deg,var(--good),#10b981);box-shadow:0 10px 30px rgba(34,197,94,0.12)}
-.choice.wrong{background:linear-gradient(90deg,var(--bad),#fb7185);box-shadow:0 10px 30px rgba(239,68,68,0.12)}
-.choice.glow{animation:glow 1s ease-in-out infinite}
-@keyframes glow{0%{box-shadow:0 0 6px rgba(56,189,248,0.12)}50%{box-shadow:0 0 18px rgba(56,189,248,0.18)}100%{box-shadow:0 0 6px rgba(56,189,248,0.12)}}
-.feedback{min-height:24px;margin-top:12px;color:var(--muted)}
-.small{font-size:13px;color:var(--muted)}
-.next{display:flex;justify-content:flex-end;margin-top:12px}
-.next .btn{min-width:110px}
-.sidebar .admin-title{color:var(--accent2);font-weight:800;margin-bottom:10px}
-.table{width:100%;border-collapse:collapse}
-.table th,.table td{padding:8px;border-bottom:1px solid rgba(255,255,255,0.03);font-size:13px;text-align:left}
-.table th{color:var(--muted)}
-.input{width:100%;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:var(--text)}
-.form-row{display:flex;gap:8px}
-.form-row .input{flex:1}
-.muted{color:var(--muted)}
-.modal{position:fixed;left:0;top:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:linear-gradient(0deg,rgba(2,6,23,0.6),rgba(2,6,23,0.6));z-index:60}
-.modal-card{width:96%;max-width:520px;background:var(--card);padding:18px;border-radius:12px;border:1px solid rgba(255,255,255,0.03)}
-.row-actions{display:flex;gap:6px}
-.link{background:none;border:0;color:var(--accent1);cursor:pointer;font-weight:700}
-.small-btn{padding:6px 8px;border-radius:8px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.02);color:var(--muted);cursor:pointer}
-.confetti{pointer-events:none;position:fixed;left:0;top:0;width:100%;height:100%;overflow:hidden}
-.confetti span{position:absolute;width:10px;height:14px;opacity:0;transform:translateY(-10px) rotate(0);animation:drop 1.6s linear forwards}
-@keyframes drop{to{opacity:1;transform:translateY(110vh) rotate(720deg)}}
-.footer{margin-top:12px;color:var(--muted);font-size:13px;text-align:center}
-</style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'; img-src 'self' data:;">
+  <title>Neon Media Literacy Quiz — Admin + Player</title>
+
+  <style>
+    :root {
+      --bg:#050816; --panel:#07122a; --card:#0b1530; --accent1:#38bdf8; --accent2:#8b5cf6;
+      --glow:rgba(56,189,248,0.15); --good:#22c55e; --bad:#ef4444; --muted:#9fb0c8; --text:#e6eef6;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;background:radial-gradient(600px 300px at 10% 10%, rgba(124,58,237,0.06), transparent),radial-gradient(800px 400px at 90% 90%, rgba(56,189,248,0.04), transparent),var(--bg);font-family:Inter,ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,Arial;color:var(--text);min-height:100vh;padding:28px;display:flex;align-items:flex-start;justify-content:center}
+    .app{width:100%;max-width:1100px}
+    .header{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:18px}
+    .brand h1{margin:0;color:var(--accent1);letter-spacing:0.6px}
+    .brand p{margin:0;color:var(--muted);font-size:13px}
+    .controls{display:flex;gap:8px}
+    .btn{background:linear-gradient(90deg,var(--card),var(--panel));border:1px solid rgba(255,255,255,0.03);padding:8px 12px;border-radius:10px;color:var(--accent1);cursor:pointer;font-weight:700}
+    .btn.primary{background:linear-gradient(90deg,var(--accent1),var(--accent2));color:#041025;border:none;box-shadow:0 6px 18px rgba(59,130,246,0.12)}
+    .layout{display:grid;grid-template-columns:1fr 420px;gap:18px}
+    @media(max-width:980px){.layout{grid-template-columns:1fr}}
+    .card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border-radius:14px;padding:16px;border:1px solid rgba(255,255,255,0.02);box-shadow:0 8px 30px rgba(2,6,23,0.6)}
+    .question{font-size:1.1rem;font-weight:800;margin:16px 0}
+    .choices{display:flex;gap:12px}
+    .choice{flex:1;padding:12px;border-radius:10px;border:2px solid rgba(255,255,255,0.03);background:transparent;color:#fff;font-weight:800;cursor:pointer;transition:all .2s}
+    .choice:hover{transform:translateY(-4px);box-shadow:0 10px 30px rgba(56,189,248,0.06)}
+    .choice.correct{background:linear-gradient(90deg,var(--good),#10b981)}
+    .choice.wrong{background:linear-gradient(90deg,var(--bad),#fb7185)}
+    .footer{margin-top:12px;color:var(--muted);font-size:13px;text-align:center}
+  </style>
 </head>
 <body>
   <div class="app">
@@ -70,238 +46,112 @@ body{margin:0;background:radial-gradient(600px 300px at 10% 10%, rgba(124,58,237
       </div>
     </div>
 
-    <div class="layout">
-      <main class="card">
-        <div class="quiz-top">
-          <div class="progress-wrap"><div class="progress" id="progress"></div></div>
-          <div class="score small" id="score">Score: 0/10</div>
+    <main class="card">
+      <div id="startScreen">
+        <label class="small muted">Enter your name to start</label>
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <input id="playerName" class="input" placeholder="Your name" />
+          <button class="btn primary" id="startBtn">Start</button>
         </div>
-
-        <div id="startScreen" class="fade-in">
-          <label class="small muted">Enter your name to start</label>
-          <div style="display:flex;gap:8px;margin-top:8px">
-            <input id="playerName" class="input" placeholder="Your name" />
-            <button class="btn primary" id="startBtn">Start</button>
-          </div>
-        </div>
-
-        <div id="quizArea" style="display:none">
-          <div class="question" id="question">Loading...</div>
-          <div class="choices">
-            <button class="choice" id="btnTrue">True</button>
-            <button class="choice" id="btnFalse">False</button>
-          </div>
-          <div class="feedback" id="feedback"></div>
-          <div class="next"><button class="btn" id="nextBtn">Next ➜</button></div>
-        </div>
-
-        <div id="endArea" style="display:none;text-align:center">
-          <div style="font-weight:800;font-size:1.2rem;margin-top:8px" id="finalText"></div>
-          <div style="margin-top:12px"><button class="btn primary" id="restartBtn">Restart</button></div>
-        </div>
-
-        <div class="footer">Neon edition • Data saved locally in your browser</div>
-      </main>
-
-      <aside class="card sidebar" id="adminPanel" style="display:none">
-        <div class="admin-title">Admin Console</div>
-        <div class="small muted">(Password protected)</div>
-        <div style="margin-top:10px"> 
-          <button class="btn" id="viewSubsBtn">View Submissions</button>
-          <button class="btn" id="manageQBtn">Manage Questions</button>
-        </div>
-
-        <div id="adminStats" style="margin-top:12px">
-          <div class="small muted">Total attempts: <span id="totalAttempts">0</span></div>
-          <div class="small muted">Avg score: <span id="avgScore">0</span></div>
-        </div>
-
-        <div style="margin-top:12px">
-          <label class="small muted">Admin password</label>
-          <input id="adminPassInput" class="input" type="password" placeholder="Enter admin password" />
-          <div style="display:flex;gap:8px;margin-top:8px">
-            <button class="btn" id="adminLoginBtn">Unlock</button>
-            <button class="btn" id="adminLockBtn" style="display:none">Lock</button>
-          </div>
-        </div>
-      </aside>
-    </div>
-
-    <!-- Modal: submissions / question manager -->
-    <div id="modal" class="modal" style="display:none">
-      <div class="modal-card">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-          <strong id="modalTitle">Modal</strong>
-          <div><button class="small-btn" id="closeModal">Close</button></div>
-        </div>
-
-        <div id="modalBody"></div>
       </div>
-    </div>
 
-    <div class="confetti" id="confetti"></div>
+      <div id="quizArea" style="display:none">
+        <div class="question" id="question">Loading...</div>
+        <div class="choices">
+          <button class="choice" id="btnTrue">True</button>
+          <button class="choice" id="btnFalse">False</button>
+        </div>
+        <div id="feedback"></div>
+        <div style="margin-top:12px;text-align:right">
+          <button class="btn" id="nextBtn" style="display:none">Next ➜</button>
+        </div>
+      </div>
+
+      <div id="endArea" style="display:none;text-align:center">
+        <h3 id="finalText"></h3>
+        <button class="btn primary" id="restartBtn">Restart</button>
+      </div>
+
+      <div class="footer">Neon Edition • Data saved locally</div>
+    </main>
   </div>
 
-<script>
-// keys
-const QKEY = 'neon_quiz_questions_v1';
-const SKEY = 'neon_quiz_submissions_v1';
-const ADMIN_PASS = 'password'; // as requested
+  <script type="module">
+    // Everything wrapped to avoid global leaks
+    const QKEY = 'neon_quiz_questions_v1';
+    const SKEY = 'neon_quiz_submissions_v1';
 
-// defaults
-const DEFAULT_Q = [
-  {q:"A celebrity’s photo with a shocking caption is always true if many people share it.",a:false,e:"Virality ≠ truth; photos & captions can be altered or misattributed."},
-  {q:"If an image has inconsistent lighting or duplicated elements, it may be edited.",a:true,e:"Visual inconsistencies commonly indicate manipulation."},
-  {q:"Screenshots of messages are always reliable evidence.",a:false,e:"Screenshots can be fabricated; verify original sources where possible."},
-  {q:"Deepfakes can be detected by subtle glitches like unnatural blinking.",a:true,e:"Deepfakes often leave small artifacts but detection is improving."},
-  {q:"Headlines in ALL CAPS are more trustworthy.",a:false,e:"ALL CAPS is often clickbait designed to provoke reactions."},
-  {q:"Reverse image search helps identify the origin of a photo.",a:true,e:"Reverse search often reveals the earliest appearance or similar images."},
-  {q:"If something is posted on a .gov website, it’s automatically unbiased.",a:false,e:"Official sources can be authoritative, but still need context and verification."},
-  {q:"If only one news site reports a story, verify before sharing.",a:true,e:"Multiple reputable confirmations increase reliability."},
-  {q:"Satire sites sometimes publish believable but fake stories.",a:true,e:"Satire intentionally creates fictional pieces — check disclaimers."},
-  {q:"Numbers in an article guarantee it’s accurate.",a:false,e:"Statistics can be misleading; check methodology and source."}
-];
+    const DEFAULT_Q = [
+      {q:"A celebrity’s photo with a shocking caption is always true if many people share it.",a:false,e:"Virality ≠ truth; photos can be altered."},
+      {q:"If an image has inconsistent lighting, it may be edited.",a:true,e:"Visual inconsistencies often indicate manipulation."}
+    ];
 
-// load/save
-function loadQuestions(){try{const r=localStorage.getItem(QKEY);return r?JSON.parse(r):DEFAULT_Q.slice()}catch(e){return DEFAULT_Q.slice()}}
-function saveQuestions(qs){localStorage.setItem(QKEY,JSON.stringify(qs))}
-function loadSubs(){try{const r=localStorage.getItem(SKEY);return r?JSON.parse(r):[]}catch(e){return[]}}
-function saveSubs(ss){localStorage.setItem(SKEY,JSON.stringify(ss))}
+    const startBtn = document.getElementById('startBtn');
+    const playerNameInput = document.getElementById('playerName');
+    const quizArea = document.getElementById('quizArea');
+    const startScreen = document.getElementById('startScreen');
+    const questionEl = document.getElementById('question');
+    const btnTrue = document.getElementById('btnTrue');
+    const btnFalse = document.getElementById('btnFalse');
+    const feedback = document.getElementById('feedback');
+    const nextBtn = document.getElementById('nextBtn');
+    const endArea = document.getElementById('endArea');
+    const finalText = document.getElementById('finalText');
+    const restartBtn = document.getElementById('restartBtn');
 
-let questions = loadQuestions();
-let submissions = loadSubs();
+    let idx=0, score=0, questions=[...DEFAULT_Q];
 
-// UI refs
-const startScreen = document.getElementById('startScreen');
-const playerNameInput = document.getElementById('playerName');
-const startBtn = document.getElementById('startBtn');
-const quizArea = document.getElementById('quizArea');
-const questionEl = document.getElementById('question');
-const btnTrue = document.getElementById('btnTrue');
-const btnFalse = document.getElementById('btnFalse');
-const feedbackEl = document.getElementById('feedback');
-const progressEl = document.getElementById('progress');
-const scoreEl = document.getElementById('score');
-const nextBtn = document.getElementById('nextBtn');
-const endArea = document.getElementById('endArea');
-const finalText = document.getElementById('finalText');
-const restartBtn = document.getElementById('restartBtn');
-const openAdminBtn = document.getElementById('openAdminBtn');
-const adminPanel = document.getElementById('adminPanel');
-const adminLoginBtn = document.getElementById('adminLoginBtn');
-const adminLockBtn = document.getElementById('adminLockBtn');
-const adminPassInput = document.getElementById('adminPassInput');
-const modal = document.getElementById('modal');
-const modalTitle = document.getElementById('modalTitle');
-const modalBody = document.getElementById('modalBody');
-const closeModal = document.getElementById('closeModal');
-const viewSubsBtn = document.getElementById('viewSubsBtn');
-const manageQBtn = document.getElementById('manageQBtn');
-const totalAttempts = document.getElementById('totalAttempts');
-const avgScore = document.getElementById('avgScore');
-const downloadBtn = document.getElementById('downloadBtn');
-const clearAllBtn = document.getElementById('clearAllBtn');
+    function startQuiz() {
+      const name = playerNameInput.value.trim();
+      if(!name) return alert('Enter your name first!');
+      startScreen.style.display='none';
+      quizArea.style.display='block';
+      idx=0; score=0;
+      loadQuestion();
+    }
 
-let idx=0; let score=0; let playerName=''; let answers=[];
+    function loadQuestion(){
+      const q = questions[idx];
+      questionEl.textContent = `${idx+1}. ${q.q}`;
+      feedback.textContent = '';
+      btnTrue.disabled = btnFalse.disabled = false;
+      nextBtn.style.display='none';
+    }
 
-function init(){updateStats(); renderStart();}
+    function handleAnswer(isTrue){
+      const q = questions[idx];
+      const correct = q.a===isTrue;
+      btnTrue.disabled = btnFalse.disabled = true;
+      feedback.textContent = correct ? `✅ Correct — ${q.e}` : `❌ Wrong — ${q.e}`;
+      feedback.style.color = correct ? 'limegreen' : 'tomato';
+      if(correct) score++;
+      nextBtn.style.display='inline-block';
+    }
 
-function renderStart(){startScreen.style.display='block';quizArea.style.display='none';endArea.style.display='none';}
+    function nextQuestion(){
+      idx++;
+      if(idx < questions.length) loadQuestion();
+      else finishQuiz();
+    }
 
-function startQuiz(){playerName = (playerNameInput.value||'Anonymous').trim(); if(!playerName){alert('Please enter your name');return} startScreen.style.display='none';quizArea.style.display='block';idx=0;score=0;answers=[];loadQuestion();}
+    function finishQuiz(){
+      quizArea.style.display='none';
+      endArea.style.display='block';
+      finalText.textContent = `You scored ${score}/${questions.length}`;
+      localStorage.setItem(SKEY, JSON.stringify({score, when:new Date().toISOString()}));
+    }
 
-function loadQuestion(){const q=questions[idx];questionEl.textContent = `${idx+1}. ${q.q}`;feedbackEl.textContent='';btnTrue.disabled=false;btnFalse.disabled=false;btnTrue.className='choice';btnFalse.className='choice';updateProgress();}
+    function restart(){
+      endArea.style.display='none';
+      startScreen.style.display='block';
+      playerNameInput.value='';
+    }
 
-function updateProgress(){progressEl.style.width = `${(idx/questions.length)*100}%`;scoreEl.textContent = `Score: ${score}/${questions.length}`}
-
-function handleAnswer(isTrue){const q=questions[idx];const correct = q.a===isTrue; btnTrue.disabled = btnFalse.disabled = true; if(correct){score++;feedbackEl.textContent='✅ Correct — '+q.e;feedbackEl.style.color='var(--good)'; if(isTrue) btnTrue.classList.add('correct'); else btnFalse.classList.add('correct'); } else {feedbackEl.textContent='❌ Wrong — '+q.e;feedbackEl.style.color='var(--bad)'; if(isTrue) btnTrue.classList.add('wrong'); else btnFalse.classList.add('wrong'); if(q.a) (q.a?btnTrue:btnFalse).classList.add('correct');}
-  // add glow briefly
-  btnTrue.classList.add('glow');btnFalse.classList.add('glow');
-  answers.push({q:q.q,chosen:isTrue,correct:q.a});
-  nextBtn.style.display='inline-block';
-  triggerConfetti(correct);
-  updateProgress();
-}
-
-function nextQuestion(){idx++; if(idx<questions.length){loadQuestion(); nextBtn.style.display='none';} else {finishQuiz();}}
-
-function finishQuiz(){quizArea.style.display='none';endArea.style.display='block';finalText.textContent = `${playerName}, you scored ${score}/${questions.length}`; // save submission
-  const sub = {name:playerName,score:score,total:questions.length,when:new Date().toISOString(),answers}; submissions.push(sub); saveSubs(submissions); updateStats();}
-
-function restart(){playerNameInput.value='';renderStart();}
-
-// confetti
-function triggerConfetti(ok){if(!ok) return; const el=document.getElementById('confetti'); el.innerHTML=''; for(let i=0;i<20;i++){const s=document.createElement('span'); s.style.left=(Math.random()*100)+'%'; s.style.background=['#f43f5e','#f59e0b','#10b981','#60a5fa','#a78bfa'][Math.floor(Math.random()*5)]; s.style.animationDelay=(Math.random()*0.3)+'s'; el.appendChild(s);} setTimeout(()=>el.innerHTML='',1600);}
-
-// admin
-openAdminBtn.addEventListener('click',()=>{adminPanel.style.display = adminPanel.style.display==='none'?'block':'none'})
-adminLoginBtn.addEventListener('click',()=>{const p = adminPassInput.value; if(p===ADMIN_PASS){unlockAdmin();} else alert('Wrong password')} )
-adminLockBtn.addEventListener('click',()=>{lockAdmin();})
-
-function unlockAdmin(){adminLoginBtn.style.display='none';adminLockBtn.style.display='inline-block';adminPassInput.style.display='none'; document.getElementById('openAdminBtn').textContent='Admin (unlocked)';}
-function lockAdmin(){adminLoginBtn.style.display='inline-block';adminLockBtn.style.display='none';adminPassInput.style.display='block'; document.getElementById('openAdminBtn').textContent='Admin';}
-
-viewSubsBtn.addEventListener('click',()=>openSubsModal());
-manageQBtn.addEventListener('click',()=>openQuestionsModal());
-closeModal.addEventListener('click',()=>{modal.style.display='none';modalBody.innerHTML=''});
-
-function openSubsModal(){modal.style.display='flex';modalTitle.textContent='Submissions'; renderSubs();}
-
-function renderSubs(){modalBody.innerHTML=''; if(submissions.length===0){modalBody.innerHTML='<div class="small muted">No submissions yet</div>'; return}
-  const table = document.createElement('table'); table.className='table'; const thead = document.createElement('thead'); thead.innerHTML='<tr><th>When</th><th>Name</th><th>Score</th><th>Actions</th></tr>'; table.appendChild(thead); const tbody=document.createElement('tbody'); submissions.slice().reverse().forEach((s,i)=>{const tr=document.createElement('tr'); tr.innerHTML = `<td>${new Date(s.when).toLocaleString()}</td><td>${escapeHtml(s.name)}</td><td>${s.score}/${s.total}</td><td><div class="row-actions"><button class="small-btn" data-idx="${submissions.length-1-i}" onclick="viewSubmission(this)">View</button><button class="small-btn" data-del="${submissions.length-1-i}" onclick="deleteSubmission(this)">Delete</button></div></td>`; tbody.appendChild(tr)}); table.appendChild(tbody); modalBody.appendChild(table);
-  const exportBtn = document.createElement('button'); exportBtn.className='btn'; exportBtn.textContent='Export Submissions'; exportBtn.onclick = ()=>{downloadJSON({submissions})}; modalBody.appendChild(exportBtn);
-}
-
-function viewSubmission(btn){const id = Number(btn.dataset.idx); const s = submissions[id]; const details = s.answers.map(a=>`Q: ${a.q}
-Chosen: ${a.chosen} | Correct: ${a.correct}`).join('
-
-'); alert(`Submission ${new Date(s.when).toLocaleString()}
-Name: ${s.name}
-Score: ${s.score}/${s.total}
-
-Details:
-
-${details}`)}
-function deleteSubmission(btn){const id = Number(btn.dataset.del); if(confirm('Delete this submission?')){submissions.splice(id,1); saveSubs(submissions); renderSubs(); updateStats();}}
-
-// questions manager
-function openQuestionsModal(){modal.style.display='flex';modalTitle.textContent='Manage Questions'; renderQuestionManager();}
-
-function renderQuestionManager(){modalBody.innerHTML=''; const list = document.createElement('div'); list.style.display='grid'; list.style.gap='8px'; questions.forEach((q,idx)=>{ const item=document.createElement('div'); item.style.display='flex'; item.style.justifyContent='space-between'; item.style.alignItems='center'; item.style.padding='8px'; item.style.border='1px solid rgba(255,255,255,0.03)'; item.style.borderRadius='8px'; item.innerHTML = `<div><div style="font-weight:800">${escapeHtml(q.q)}</div><div class="small muted">Answer: ${q.a?'True':'False'} — ${escapeHtml(q.e)}</div></div><div class="row-actions"><button class="small-btn" data-edit="${idx}" onclick="editQuestion(this)">Edit</button><button class="small-btn" data-del="${idx}" onclick="deleteQuestion(this)">Delete</button></div>`; list.appendChild(item); }); modalBody.appendChild(list);
-  // add form
-  const form = document.createElement('div'); form.style.marginTop='12px'; form.innerHTML = `<h4>Add question</h4><div style="display:flex;gap:8px;margin-top:6px"><input id='newQtext' class='input' placeholder='Question text' /><select id='newQans' class='input' style='max-width:140px'><option value='true'>True</option><option value='false'>False</option></select></div><textarea id='newQexp' class='input' rows='2' placeholder='Short explanation' style='margin-top:8px'></textarea><div style='margin-top:8px;display:flex;gap:8px'><button class='btn primary' id='addQbtn'>Add</button><button class='btn' id='saveQbtn'>Save to storage</button></div>`;
-  modalBody.appendChild(form);
-  document.getElementById('addQbtn').addEventListener('click',()=>{const t=document.getElementById('newQtext').value.trim();const e=document.getElementById('newQexp').value.trim();const a=document.getElementById('newQans').value==='true'; if(!t){alert('Enter question text');return} questions.push({q:t,a:a,e:e}); renderQuestionManager();});
-  document.getElementById('saveQbtn').addEventListener('click',()=>{saveQuestions(questions);alert('Questions saved locally')});
-}
-
-function editQuestion(btn){const id = Number(btn.dataset.edit); const q = questions[id]; const newQ = prompt('Edit question text',q.q); if(newQ===null) return; const newAns = confirm('Is the correct answer TRUE? OK=true, Cancel=false'); const newExp = prompt('Short explanation',q.e); questions[id] = {q:newQ,a:newAns,e:newExp||''}; saveQuestions(questions); renderQuestionManager();}
-function deleteQuestion(btn){const id = Number(btn.dataset.del); if(confirm('Delete this question?')){questions.splice(id,1); saveQuestions(questions); renderQuestionManager();}}
-
-// utils
-function escapeHtml(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
-
-function updateStats(){totalAttempts.textContent = submissions.length; if(submissions.length===0){avgScore.textContent='-';return} const avg = submissions.reduce((s,o)=>s+o.score,0)/submissions.length; avgScore.textContent = avg.toFixed(2)}
-
-function downloadJSON(obj){const blob=new Blob([JSON.stringify(obj,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='neon_quiz_data.json';document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url)}
-
-downloadBtn.addEventListener('click',()=>downloadJSON({questions,submissions}));
-clearAllBtn.addEventListener('click',()=>{if(confirm('Clear all questions and submissions and reset to defaults?')){localStorage.removeItem(QKEY);localStorage.removeItem(SKEY);questions = loadQuestions();submissions = [];saveSubs(submissions);updateStats();alert('Cleared');renderStart();}})
-
-function deleteAll(){if(confirm('Delete all submissions?')){submissions=[];saveSubs(submissions);updateStats();}}
-
-// helpers for modal callbacks referenced inline
-window.viewSubmission = viewSubmission; window.deleteSubmission = deleteSubmission; window.editQuestion = editQuestion; window.deleteQuestion = deleteQuestion;
-
-// events
-startBtn.addEventListener('click',startQuiz);
-btnTrue.addEventListener('click',()=>handleAnswer(true));
-btnFalse.addEventListener('click',()=>handleAnswer(false));
-nextBtn.addEventListener('click',nextQuestion);
-restartBtn.addEventListener('click',restart);
-
-// init
-init();
-</script>
+    startBtn.addEventListener('click', startQuiz);
+    btnTrue.addEventListener('click', ()=>handleAnswer(true));
+    btnFalse.addEventListener('click', ()=>handleAnswer(false));
+    nextBtn.addEventListener('click', nextQuestion);
+    restartBtn.addEventListener('click', restart);
+  </script>
 </body>
 </html>
